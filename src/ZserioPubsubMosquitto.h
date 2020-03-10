@@ -18,6 +18,7 @@ public:
     class MosquittoSubscription;
 
     MosquittoClient(const std::string& host, uint16_t port);
+    ~MosquittoClient();
 
     virtual void publish(const std::string& topic, const std::vector<uint8_t>& data, void* context) override;
     virtual SubscriptionId subscribe(const std::string& topic, const OnTopic& callback, void* context) override;

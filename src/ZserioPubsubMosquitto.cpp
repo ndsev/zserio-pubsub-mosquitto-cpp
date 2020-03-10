@@ -87,6 +87,10 @@ MosquittoClient::MosquittoClient(const std::string& host, uint16_t port)
 :   m_host(host), m_port(port), m_numIds(0)
 {}
 
+// no inline to because MosquittoSubscription uses unique_ptr
+MosquittoClient::~MosquittoClient()
+{}
+
 void MosquittoClient::publish(const std::string& topic, const std::vector<uint8_t>& data, void*)
 {
     // TODO: use the context

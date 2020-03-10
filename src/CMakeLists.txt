@@ -11,5 +11,5 @@ add_library(${PROJECT_NAME}
     ZserioPubsubMosquitto.cpp
     ZserioPubsubMosquitto.h
 )
-target_link_libraries(ZserioPubsubMosquitto -lmosquitto)
 target_include_directories(ZserioPubsubMosquitto PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${ZSERIO_INCLUDE_DIR})
+target_link_libraries(ZserioPubsubMosquitto -lmosquitto)
