@@ -1,6 +1,7 @@
 # Calculator Example
 
-This example demonstrates how to use **ZsserioPubsubMosquitto** to use Pub/Sub communication with [mosquitto](https://mosquitto.org/) broker.
+This example demonstrates how to use **Zserio Pub/Sub Mosquitto backend** to use Pub/Sub communication
+with [mosquitto](https://mosquitto.org/) broker.
 
 ## Prerequisites
 
@@ -33,3 +34,5 @@ cd build
 fg # and press Ctrl+C to quit SquareRootOfProvider
 fg # and press Ctrl+C to quit PowerOfTwoProvider
 ```
+
+> For more understandable output run both providers and client in a separate terminal.

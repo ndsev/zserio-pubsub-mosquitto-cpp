@@ -4,11 +4,11 @@ Sample implementation of Zserio Pub/Sub mosquitto backend in **C++**.
 
 ## Prerequisites
 
-Install [Mosquitto](https://mosquitto.org) according to
+1. Install [Mosquitto](https://mosquitto.org) according to
 [official instructions](https://mosquitto.org/download/). Mosquitto is the message broker which implements
 MQTT protocol.
 
-> This sample backend implementation is based on C library libmosquitto.
+2. This sample backend implementation is based on C library libmosquitto.
 E.g. on Ubuntu install libmosquitto-dev.
 
 ## Building

@@ -55,7 +55,7 @@ MosquittoClient::MosquittoSubscription::MosquittoSubscription(const std::string&
     if (!m_mosq)
         throw std::runtime_error("Failed to create mosquitto instance!");
     mosquitto_message_callback_set(m_mosq.get(), message_callback);
-    int rc = mosquitto_connect(m_mosq.get(), m_host.c_str(), m_port, 60);
+    int rc = mosquitto_connect(m_mosq.get(), m_host.c_str(), m_port, KEEPALIVE);
     if (rc)
     {
         throw std::runtime_error(std::string("MosquittoSubscription " + std::to_string(id) +

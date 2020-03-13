@@ -29,7 +29,9 @@ private:
     uint16_t m_port;
     typedef std::unique_ptr<MosquittoSubscription> MosquittoSubscriptionPtr;
     std::map<SubscriptionId, MosquittoSubscriptionPtr> m_subscriptions;
-    SubscriptionId m_numIds; // simple naive implementation, reusability of subscription ID is not safe
+    SubscriptionId m_numIds; // simple naive implementation, reusing of subscription ID is not safe
+
+    static constexpr int KEEPALIVE = 60;
 };
 
 /**
