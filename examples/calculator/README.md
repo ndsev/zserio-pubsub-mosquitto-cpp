@@ -5,7 +5,7 @@ with [mosquitto](https://mosquitto.org/) broker.
 
 ## Prerequisites
 
-1. Mosquitto broker running.
+1. [Mosquitto](https://mosquitto.org) message broker running.
    > On Ubuntu check `systemctl status mosquitto`.
 2. Zserio C++ runtime library.
 3. Zserio compiler (`zserio.jar`)
