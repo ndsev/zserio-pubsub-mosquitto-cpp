@@ -18,6 +18,7 @@ with [mosquitto](https://mosquitto.org/) broker.
 mkdir build
 pushd build
 cmake ..
+cmake --build .
 popd
 ```
 

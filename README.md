@@ -19,7 +19,7 @@ Build ZserioPubsubMosquitto library:
 mkdir build
 pushd build
 cmake ../src
-make
+cmake --build .
 popd
 ```
 
