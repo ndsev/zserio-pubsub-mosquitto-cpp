@@ -2,6 +2,8 @@
 #include <string.h>
 #include <string>
 #include <iostream>
+#include <chrono>
+#include <thread>
 
 #include "ZserioPubsubMosquitto.h"
 #include "calculator/CalculatorClient.h"
@@ -118,7 +120,9 @@ int main(int argc, char* argv[])
 
         if (input[0] == 'q')
         {
-            std::cout << "Quit." << std::endl;
+            std::cout << "Quitting." << std::endl;
+            // wait a little bit for a potential responses
+            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
             return 0;
         }
 
