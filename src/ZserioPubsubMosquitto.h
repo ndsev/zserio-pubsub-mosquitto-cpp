@@ -10,7 +10,7 @@ namespace zserio_pubsub_mosquitto
 {
 
 /**
- * Sample Zseiro IPubsub implementation using mosquitto C library.
+ * Sample Zserio IPubsub implementation using mosquitto C library.
  */
 class MosquittoClient : public zserio::IPubsub
 {

@@ -110,7 +110,8 @@ MosquittoClient::SubscriptionId MosquittoClient::subscribe(zserio::StringView to
         const std::shared_ptr<OnTopicCallback>& callback, void*)
 {
     // TODO: use the context
-    m_subscriptions.emplace(m_numIds, new MosquittoSubscription(m_host, m_port, m_numIds, topic, callback));
+    m_subscriptions.emplace(m_numIds, MosquittoSubscriptionPtr(
+            new MosquittoSubscription(m_host, m_port, m_numIds, topic, callback)));
     return m_numIds++;
 }
 
