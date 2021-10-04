@@ -58,6 +58,13 @@ add_executable(SquareRootOfProvider
     $<TARGET_OBJECTS:CalculatorGen>
 )
 
+# C++11 settings
+set_target_properties(CalculatorGen PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED YES CXX_EXTENSIONS NO)
+set_target_properties(CalculatorClient PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED YES CXX_EXTENSIONS NO)
+set_target_properties(PowerOfTwoProvider PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED YES CXX_EXTENSIONS NO)
+set_target_properties(SquareRootOfProvider PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED YES
+        CXX_EXTENSIONS NO)
+
 # generated sources
 target_include_directories(CalculatorGen PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
 target_include_directories(CalculatorClient PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
