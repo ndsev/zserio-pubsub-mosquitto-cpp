@@ -3,12 +3,11 @@ cmake_minimum_required(VERSION 2.8.12.2)
 
 project(Calculator)
 
-find_package(Java COMPONENTS Runtime)
-
-set(REPOSITORY_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../..")
+find_package(Java REQUIRED COMPONENTS Runtime)
 
 # generate Zserio Calculator Pub/Sub
-get_filename_component(ZSERIO_JAR "${REPOSITORY_ROOT}/3rdparty/zserio.jar" ABSOLUTE)
+set(DOWNLOAD_DIR "${CMAKE_CURRENT_BINARY_DIR}/ZserioPubsubMosquitto/download")
+get_filename_component(ZSERIO_JAR "${DOWNLOAD_DIR}/zserio.jar" ABSOLUTE)
 get_filename_component(CALCULATOR_ZS_FULL "calculator.zs" ABSOLUTE)
 get_filename_component(CALCULATOR_ZS "${CALCULATOR_ZS_FULL}" NAME)
 get_filename_component(CALCULATOR_ZS_PATH "${CALCULATOR_ZS_FULL}" PATH)
@@ -35,6 +34,7 @@ add_custom_command(
         -src "${CALCULATOR_ZS_PATH}" ${CALCULATOR_ZS}
         -cpp "${CMAKE_CURRENT_BINARY_DIR}" -withoutSourcesAmalgamation
     DEPENDS "${CALCULATOR_ZS}"
+    COMMENT "Generating Zserio C++ API"
 )
 
 # generated source (needed to generate ${CALCULATOR_GEN_SOURCES} only once)
@@ -65,6 +65,7 @@ target_include_directories(PowerOfTwoProvider PRIVATE "${CMAKE_CURRENT_BINARY_DI
 target_include_directories(SquareRootOfProvider PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
 
 # add ZserioPubsubMosquitto library
+set(REPOSITORY_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../..")
 add_subdirectory("${REPOSITORY_ROOT}/src" "${CMAKE_CURRENT_BINARY_DIR}/ZserioPubsubMosquitto")
 target_include_directories(CalculatorClient PRIVATE "${REPOSITORY_ROOT}/src")
 target_include_directories(PowerOfTwoProvider PRIVATE "${REPOSITORY_ROOT}/src")
@@ -74,8 +75,9 @@ target_link_libraries(PowerOfTwoProvider ZserioPubsubMosquitto)
 target_link_libraries(SquareRootOfProvider ZserioPubsubMosquitto)
 
 # add ZserioCppRuntime library
-add_subdirectory("${REPOSITORY_ROOT}/3rdparty/runtime" "${CMAKE_CURRENT_BINARY_DIR}/ZserioCppRuntime")
-target_include_directories(CalculatorGen PRIVATE "${REPOSITORY_ROOT}/3rdparty/runtime")
+set(ZSERIO_INCLUDE_DIR "${DOWNLOAD_DIR}/runtime_libs/cpp")
+add_subdirectory("${ZSERIO_INCLUDE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/ZserioCppRuntime")
+target_include_directories(CalculatorGen PRIVATE "${ZSERIO_INCLUDE_DIR}")
 target_link_libraries(CalculatorClient ZserioCppRuntime)
 target_link_libraries(PowerOfTwoProvider ZserioCppRuntime)
 target_link_libraries(SquareRootOfProvider ZserioCppRuntime)

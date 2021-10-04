@@ -7,12 +7,12 @@ with [mosquitto](https://mosquitto.org/) broker.
 
 1. [Mosquitto](https://mosquitto.org) message broker running.
    > On Ubuntu check `systemctl status mosquitto`.
-2. Zserio C++ runtime library.
-3. Zserio compiler (`zserio.jar`)
 
-> Zserio prerequisites are included in this repo in 3rdparty folder.
+> Note that Zserio prerequisites are automatically downloaded by CMake.
 
 ## Building
+
+Go to the calculator example directory.
 
 ```bash
 mkdir build
@@ -31,7 +31,7 @@ cd build
 ./CalculatorClient
 # follow client's instructions
 # ...
-# pres q + ENTER to quit the client
+# press q + ENTER to quit the client
 fg # and press Ctrl+C to quit SquareRootOfProvider
 fg # and press Ctrl+C to quit PowerOfTwoProvider
 ```

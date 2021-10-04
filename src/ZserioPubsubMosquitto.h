@@ -20,8 +20,9 @@ public:
     MosquittoClient(const std::string& host, uint16_t port);
     ~MosquittoClient();
 
-    virtual void publish(const std::string& topic, const std::vector<uint8_t>& data, void* context) override;
-    virtual SubscriptionId subscribe(const std::string& topic, const OnTopic& callback, void* context) override;
+    virtual void publish(zserio::StringView topic, zserio::Span<const uint8_t> data, void* context) override;
+    virtual SubscriptionId subscribe(zserio::StringView topic, const std::shared_ptr<OnTopicCallback>& callback,
+            void* context) override;
     virtual void unsubscribe(SubscriptionId id) override;
 
 private:

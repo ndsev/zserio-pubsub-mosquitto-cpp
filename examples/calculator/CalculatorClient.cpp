@@ -18,7 +18,7 @@ void printHelp()
               << "Note that the letters before the '>' denotes the subscribed topics." << std::endl;
 }
 
-void publishRequest(calculator::CalculatorClient client, std::string input)
+void publishRequest(calculator::CalculatorClient& client, const std::string& input)
 {
     calculator::I32 request;
     try
@@ -37,6 +37,28 @@ void publishRequest(calculator::CalculatorClient client, std::string input)
 
     client.publishRequest(request);
 }
+
+class PowerOfTwoCallback : public calculator::CalculatorClient::CalculatorClientCallback<calculator::U64>
+{
+public:
+    virtual ~PowerOfTwoCallback() = default;
+
+    virtual void operator()(zserio::StringView topic, const calculator::U64& value)
+    {
+        std::cout << "power of two: " << value.getValue() << std::endl;
+    }
+};
+
+class SquareRootOfCallback : public calculator::CalculatorClient::CalculatorClientCallback<calculator::Double>
+{
+public:
+    virtual ~SquareRootOfCallback() = default;
+
+    virtual void operator()(zserio::StringView topic, const calculator::Double& value)
+    {
+        std::cout << "square root of: " << value.getValue() << std::endl;
+    }
+};
 
 int main(int argc, char* argv[])
 {
@@ -68,17 +90,15 @@ int main(int argc, char* argv[])
     // calculator client uses the mosquitto client backend
     calculator::CalculatorClient client(mosquittoClient);
 
-    auto powerOfTwoCallback = [](const std::string&, const calculator::U64& value)
-    {
-        std::cout << "power of two: " << value.getValue() << std::endl;
-    };
+    std::shared_ptr<
+            calculator::CalculatorClient::CalculatorClientCallback<calculator::U64>> powerOfTwoCallback(
+                    new PowerOfTwoCallback());
     auto powerOfTwoId = client.subscribePowerOfTwo(powerOfTwoCallback);
     bool powerOfTwoSubscribed = true;
 
-    auto squareRootOfCallback = [](const std::string&, const calculator::Double& value)
-    {
-        std::cout << "square root of: " << value.getValue() << std::endl;
-    };
+    std::shared_ptr<
+            calculator::CalculatorClient::CalculatorClientCallback<calculator::Double>> squareRootOfCallback(
+                    new SquareRootOfCallback());
     auto squareRootOfId = client.subscribeSquareRootOf(squareRootOfCallback);
     bool squareRootOfSubscribed = true;
 

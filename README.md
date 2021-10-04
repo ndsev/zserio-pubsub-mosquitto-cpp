@@ -10,6 +10,8 @@ MQTT protocol.
 
 2. Install C library libmosquitto for development. E.g. on Ubuntu install `libmosquitto-dev`.
 
+> Note that Zserio prerequisites are automatically downloaded by CMake.
+
 ## Building
 
 Go to the zserio-pubsub-mosquitto-cpp root directory.

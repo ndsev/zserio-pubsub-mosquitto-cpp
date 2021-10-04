@@ -24,8 +24,8 @@ class MosquittoClient::MosquittoSubscription
 {
 public:
     MosquittoSubscription(const std::string& host, uint16_t port,
-            zserio::IPubsub::SubscriptionId id, const std::string& topic,
-            const zserio::IPubsub::OnTopic& callback);
+            zserio::IPubsub::SubscriptionId id, zserio::StringView topic,
+            const std::shared_ptr<zserio::IPubsub::OnTopicCallback>& callback);
 
     ~MosquittoSubscription();
 
@@ -41,15 +41,15 @@ private:
     std::string m_host;
     uint16_t m_port;
     std::string m_topic;
-    zserio::IPubsub::OnTopic m_callback;
+    std::shared_ptr<zserio::IPubsub::OnTopicCallback> m_callback;
 
     MosquittoPtr m_mosq;
 };
 
 MosquittoClient::MosquittoSubscription::MosquittoSubscription(const std::string& host, uint16_t port,
-        zserio::IPubsub::SubscriptionId id, const std::string& topic,
-        const zserio::IPubsub::OnTopic& callback)
-:   m_host(host), m_port(port), m_topic(topic), m_callback(callback)
+        zserio::IPubsub::SubscriptionId id, zserio::StringView topic,
+        const std::shared_ptr<zserio::IPubsub::OnTopicCallback>& callback)
+:   m_host(host), m_port(port), m_topic(topic.data(), topic.size()), m_callback(callback)
 {
     m_mosq.reset(mosquitto_new(nullptr, true, this));
     if (!m_mosq)
@@ -80,7 +80,7 @@ void MosquittoClient::MosquittoSubscription::callback(const struct mosquitto_mes
     uint8_t* payload = static_cast<uint8_t*>(msg->payload);
     uint32_t payloadlen = msg->payloadlen;
     std::vector<uint8_t> data(payload, payload + payloadlen);
-    m_callback(msg->topic, data);
+    (*m_callback)(zserio::StringView(msg->topic), zserio::Span<const uint8_t>(data));
 }
 
 MosquittoClient::MosquittoClient(const std::string& host, uint16_t port)
@@ -91,7 +91,7 @@ MosquittoClient::MosquittoClient(const std::string& host, uint16_t port)
 MosquittoClient::~MosquittoClient()
 {}
 
-void MosquittoClient::publish(const std::string& topic, const std::vector<uint8_t>& data, void*)
+void MosquittoClient::publish(zserio::StringView topic, zserio::Span<const uint8_t> data, void*)
 {
     // TODO: use the context
     MosquittoPtr mosq(mosquitto_new(nullptr, true, this));
@@ -101,12 +101,13 @@ void MosquittoClient::publish(const std::string& topic, const std::vector<uint8_
         throw std::runtime_error(std::string("MosquittoClient failed to connect! ") +
                 mosquitto_strerror(rc));
     }
-    mosquitto_publish(mosq.get(), nullptr, topic.c_str(), data.size(), data.data(), 0, 0);
+    const std::string topicString(topic.data(), topic.size());
+    mosquitto_publish(mosq.get(), nullptr, topicString.c_str(), data.size(), data.data(), 0, 0);
     mosquitto_disconnect(mosq.get());
 }
 
-MosquittoClient::SubscriptionId MosquittoClient::subscribe(const std::string& topic,
-        const OnTopic& callback, void*)
+MosquittoClient::SubscriptionId MosquittoClient::subscribe(zserio::StringView topic,
+        const std::shared_ptr<OnTopicCallback>& callback, void*)
 {
     // TODO: use the context
     m_subscriptions.emplace(m_numIds, new MosquittoSubscription(m_host, m_port, m_numIds, topic, callback));

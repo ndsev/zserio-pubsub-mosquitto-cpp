@@ -6,6 +6,32 @@
 #include "ZserioPubsubMosquitto.h"
 #include "calculator/PowerOfTwoProvider.h"
 
+class PowerOfTwoProviderCallback :
+        public calculator::PowerOfTwoProvider::PowerOfTwoProviderCallback<calculator::I32>
+{
+public:
+    explicit PowerOfTwoProviderCallback(calculator::PowerOfTwoProvider& powerOfTwoProvider) :
+            m_powerOfTwoProvider(powerOfTwoProvider)
+    {
+    }
+
+    virtual void operator()(zserio::StringView topic, const calculator::I32& value) override
+    {
+        std::cout << "PowerOfTwoProvider: request=" << value.getValue() << std::endl;
+
+        const uint64_t absValue = value.getValue() > 0
+                ? static_cast<uint64_t>(value.getValue())
+                : static_cast<uint64_t>(-value.getValue());
+
+        calculator::U64 response{absValue * absValue};
+        m_powerOfTwoProvider.publishPowerOfTwo(response);
+    }
+
+private:
+    calculator::PowerOfTwoProvider& m_powerOfTwoProvider;
+};
+
+
 int main(int argc, char* argv[])
 {
     for (int i = 1; i < argc; ++i)
@@ -34,19 +60,8 @@ int main(int argc, char* argv[])
     // power of two provider uses the mosquitto client backend
     calculator::PowerOfTwoProvider powerOfTwoProvider(mosquittoClient);
 
-    powerOfTwoProvider.subscribeRequest(
-        [&powerOfTwoProvider](const std::string& topic, const calculator::I32& value)
-        {
-            std::cout << "PowerOfTwoProvider: request=" << value.getValue() << std::endl;
-
-            const uint64_t absValue = value.getValue() > 0
-                    ? static_cast<uint64_t>(value.getValue())
-                    : static_cast<uint64_t>(-value.getValue());
-
-            calculator::U64 response{absValue * absValue};
-            powerOfTwoProvider.publishPowerOfTwo(response);
-        }
-    );
+    std::shared_ptr<PowerOfTwoProviderCallback> callback(new PowerOfTwoProviderCallback(powerOfTwoProvider));
+    powerOfTwoProvider.subscribeRequest(callback);
 
     std::cout << "Power of two provider, waiting for calculator/request..." << std::endl;
     std::cout << "Press Ctrl+C to quit." << std::endl;

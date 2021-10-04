@@ -7,6 +7,26 @@
 #include "ZserioPubsubMosquitto.h"
 #include "calculator/SquareRootOfProvider.h"
 
+class SquareRootOfProviderCallback :
+        public calculator::SquareRootOfProvider::SquareRootOfProviderCallback<calculator::I32>
+{
+public:
+    explicit SquareRootOfProviderCallback(calculator::SquareRootOfProvider& squareRootOfProvider) :
+            m_squareRootOfProvider(squareRootOfProvider)
+    {
+    }
+
+    virtual void operator()(zserio::StringView topic, const calculator::I32& value) override
+    {
+        std::cout << "SquareRootOfProvider: request=" << value.getValue() << std::endl;
+        calculator::Double response{sqrt(static_cast<double>(value.getValue()))};
+        m_squareRootOfProvider.publishSquareRootOf(response);
+    }
+
+private:
+    calculator::SquareRootOfProvider& m_squareRootOfProvider;
+};
+
 int main(int argc, char* argv[])
 {
     for (int i = 1; i < argc; ++i)
@@ -35,14 +55,9 @@ int main(int argc, char* argv[])
     // square root of provider uses the mosquitto client backend
     calculator::SquareRootOfProvider squareRootOfProvider(mosquittoClient);
 
-    squareRootOfProvider.subscribeRequest(
-        [&squareRootOfProvider](const std::string& topic, const calculator::I32& value)
-        {
-            std::cout << "SquareRootOfProvider: request=" << value.getValue() << std::endl;
-            calculator::Double response{sqrt(static_cast<double>(value.getValue()))};
-            squareRootOfProvider.publishSquareRootOf(response);
-        }
-    );
+    std::shared_ptr<SquareRootOfProviderCallback> callback(
+            new SquareRootOfProviderCallback(squareRootOfProvider));
+    squareRootOfProvider.subscribeRequest(callback);
 
     std::cout << "Square root of provider, waiting for calculator/request..." << std::endl;
     std::cout << "Press Ctrl+C to quit." << std::endl;
