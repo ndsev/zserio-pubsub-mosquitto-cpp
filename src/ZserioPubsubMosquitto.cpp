@@ -102,7 +102,8 @@ void MosquittoClient::publish(zserio::StringView topic, zserio::Span<const uint8
                 mosquitto_strerror(rc));
     }
     const std::string topicString(topic.data(), topic.size());
-    mosquitto_publish(mosq.get(), nullptr, topicString.c_str(), data.size(), data.data(), 0, 0);
+    mosquitto_publish(mosq.get(), nullptr, topicString.c_str(), static_cast<int>(data.size()), data.data(),
+            0, 0);
     mosquitto_disconnect(mosq.get());
 }
 
