@@ -14,6 +14,9 @@ include(zserio_download)
 
 download_zserio("${CMAKE_CURRENT_BINARY_DIR}/download" ZSERIO_JAR ZSERIO_RUNTIME_DIR)
 
+# this is necessary for Windows to create runtime dll in the same directory as executables in the build tree
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
+
 add_library(${PROJECT_NAME}
     ZserioPubsubMosquitto.cpp
     ZserioPubsubMosquitto.h
