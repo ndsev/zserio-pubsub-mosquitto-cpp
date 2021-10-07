@@ -62,7 +62,7 @@ MosquittoClient::MosquittoSubscription::MosquittoSubscription(const std::string&
     if (!m_mosq)
         throw std::runtime_error("Failed to create mosquitto instance!");
     mosquitto_message_callback_set(m_mosq.get(), message_callback);
-    int rc = mosquitto_connect(m_mosq.get(), m_host.c_str(), m_port, KEEPALIVE);
+    int rc = mosquitto_connect(m_mosq.get(), m_host.c_str(), m_port, 60);
     if (rc)
     {
         throw std::runtime_error(std::string("MosquittoSubscription " + std::to_string(id) +
@@ -106,28 +106,61 @@ void MosquittoClient::MosquittoSubscription::loopThread(std::future<void> future
     }
 }
 
-MosquittoClient::MosquittoClient(const std::string& host, uint16_t port)
-:   m_host(host), m_port(port), m_numIds(0)
-{}
-
-// no inline to because MosquittoSubscription uses unique_ptr
-MosquittoClient::~MosquittoClient()
-{}
-
-void MosquittoClient::publish(zserio::StringView topic, zserio::Span<const uint8_t> data, void*)
+class MosquittoClient::MosquittoPublisher
 {
-    // TODO: use the context
-    MosquittoPtr mosq(mosquitto_new(nullptr, true, this));
-    int rc = mosquitto_connect(mosq.get(), m_host.c_str(), m_port, 60);
+public:
+    MosquittoPublisher(const std::string& host, uint16_t port);
+
+    ~MosquittoPublisher();
+
+    MosquittoPublisher(const MosquittoPublisher& other) = delete;
+    MosquittoPublisher& operator=(const MosquittoPublisher& other) = delete;
+
+    MosquittoPublisher(MosquittoPublisher&& other) = delete;
+    MosquittoPublisher& operator=(MosquittoPublisher&& other) = delete;
+
+    void publish(zserio::StringView topic, zserio::Span<const uint8_t> data);
+
+private:
+    MosquittoPtr m_mosq;
+};
+
+MosquittoClient::MosquittoPublisher::MosquittoPublisher(const std::string& host, uint16_t port)
+:   m_mosq(mosquitto_new(nullptr, true, this))
+{
+    int rc = mosquitto_connect(m_mosq.get(), host.c_str(), port, 60);
     if (rc)
     {
         throw std::runtime_error(std::string("MosquittoClient failed to connect! ") +
                 mosquitto_strerror(rc));
     }
+}
+
+MosquittoClient::MosquittoPublisher::~MosquittoPublisher()
+{
+    mosquitto_disconnect(m_mosq.get());
+}
+
+void MosquittoClient::MosquittoPublisher::publish(zserio::StringView topic, zserio::Span<const uint8_t> data)
+{
     const std::string topicString(topic.data(), topic.size());
-    mosquitto_publish(mosq.get(), nullptr, topicString.c_str(), static_cast<int>(data.size()), data.data(),
+    mosquitto_publish(m_mosq.get(), nullptr, topicString.c_str(), static_cast<int>(data.size()), data.data(),
             0, 0);
-    mosquitto_disconnect(mosq.get());
+}
+
+MosquittoClient::MosquittoClient(const std::string& host, uint16_t port)
+:   m_host(host), m_port(port), m_numIds(0), m_publisher(new MosquittoPublisher(host, port))
+{
+}
+
+// no inline to because MosquittoSubscription uses unique_ptr
+MosquittoClient::~MosquittoClient()
+{
+}
+
+void MosquittoClient::publish(zserio::StringView topic, zserio::Span<const uint8_t> data, void*)
+{
+    m_publisher->publish(topic, data);
 }
 
 MosquittoClient::SubscriptionId MosquittoClient::subscribe(zserio::StringView topic,

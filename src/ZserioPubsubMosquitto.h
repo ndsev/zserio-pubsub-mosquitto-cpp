@@ -16,6 +16,7 @@ class MosquittoClient : public zserio::IPubsub
 {
 public:
     class MosquittoSubscription;
+    class MosquittoPublisher;
 
     MosquittoClient(const std::string& host, uint16_t port);
     ~MosquittoClient();
@@ -31,8 +32,8 @@ private:
     typedef std::unique_ptr<MosquittoSubscription> MosquittoSubscriptionPtr;
     std::map<SubscriptionId, MosquittoSubscriptionPtr> m_subscriptions;
     SubscriptionId m_numIds; // simple naive implementation, reusing of subscription ID is not safe
-
-    static constexpr int KEEPALIVE = 60;
+    typedef std::unique_ptr<MosquittoPublisher> MosquittoPublisherPtr;
+    MosquittoPublisherPtr m_publisher;
 };
 
 /**
