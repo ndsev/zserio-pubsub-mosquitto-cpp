@@ -24,8 +24,9 @@ popd
 
 ## Testing
 
+Go to the build directory where executables are located.
+
 ```bash
-cd build
 ./PowerOfTwoProvider &
 ./SquareRootOfProvider &
 ./CalculatorClient

@@ -1,3 +1,7 @@
+#include <thread>
+#include <future>
+#include <chrono>
+
 #include <mosquitto.h>
 
 #include "ZserioPubsubMosquitto.h"
@@ -36,6 +40,7 @@ public:
     MosquittoSubscription& operator=(MosquittoSubscription&& other) = delete;
 
     void callback(const struct mosquitto_message* msg);
+    void loopThread(std::future<void> futureObj);
 
 private:
     std::string m_host;
@@ -44,6 +49,8 @@ private:
     std::shared_ptr<zserio::IPubsub::OnTopicCallback> m_callback;
 
     MosquittoPtr m_mosq;
+    std::thread m_loopThread;
+    std::promise<void> m_exitSignal;
 };
 
 MosquittoClient::MosquittoSubscription::MosquittoSubscription(const std::string& host, uint16_t port,
@@ -62,16 +69,19 @@ MosquittoClient::MosquittoSubscription::MosquittoSubscription(const std::string&
                 " failed to connect! ") + mosquitto_strerror(rc));
     }
     mosquitto_subscribe(m_mosq.get(), nullptr, m_topic.c_str(), 0);
-    mosquitto_loop_start(m_mosq.get());
+
+    m_loopThread =  std::thread(&MosquittoClient::MosquittoSubscription::loopThread, this,
+            m_exitSignal.get_future());
 }
 
 MosquittoClient::MosquittoSubscription::~MosquittoSubscription()
 {
     if (m_mosq)
     {
+        m_exitSignal.set_value();
+        m_loopThread.join();
         mosquitto_unsubscribe(m_mosq.get(), nullptr, m_topic.c_str());
         mosquitto_disconnect(m_mosq.get());
-        mosquitto_loop_stop(m_mosq.get(), false);
     }
 }
 
@@ -81,6 +91,19 @@ void MosquittoClient::MosquittoSubscription::callback(const struct mosquitto_mes
     uint32_t payloadlen = msg->payloadlen;
     std::vector<uint8_t> data(payload, payload + payloadlen);
     (*m_callback)(zserio::StringView(msg->topic), zserio::Span<const uint8_t>(data));
+}
+
+void MosquittoClient::MosquittoSubscription::loopThread(std::future<void> futureObj)
+{
+    while (futureObj.wait_for(std::chrono::milliseconds(1)) == std::future_status::timeout)
+    {
+        const int rc = mosquitto_loop(m_mosq.get(), -1, 1);
+        if (rc)
+        {
+            throw std::runtime_error(std::string("MosquittoSubscription failed to loop! ") +
+                    mosquitto_strerror(rc));
+        }
+    }
 }
 
 MosquittoClient::MosquittoClient(const std::string& host, uint16_t port)
