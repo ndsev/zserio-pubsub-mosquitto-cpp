@@ -1,5 +1,5 @@
-# Calculator Example using ZserioServiceGrpc library
-cmake_minimum_required(VERSION 2.8.12.2)
+# Calculator Example using Zserio Pub/Sub Mosquitto library
+cmake_minimum_required(VERSION 3.1.0)
 
 project(Calculator)
 
