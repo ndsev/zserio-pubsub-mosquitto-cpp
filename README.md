@@ -1,5 +1,12 @@
 # Zserio Pub/Sub Mosquitto Backend
 
+[![](https://github.com/ndsev/zserio-pubsub-mosquitto-cpp/actions/workflows/build_linux.yml/badge.svg)](https://github.com/ndsev/zserio-pubsub-mosquitto-cpp/actions/workflows/build_linux.yml)
+[![](https://img.shields.io/github/watchers/ndsev/zserio-pubsub-mosquitto-cpp.svg)](https://GitHub.com/ndsev/zserio-pubsub-mosquitto-cpp/watchers)
+[![](https://img.shields.io/github/forks/ndsev/zserio-pubsub-mosquitto-cpp.svg)](https://GitHub.com/ndsev/zserio-pubsub-mosquitto-cpp/network/members)
+[![](https://img.shields.io/github/stars/ndsev/zserio-pubsub-mosquitto-cpp.svg?color=yellow)](https://GitHub.com/ndsev/zserio-pubsub-mosquitto-cpp/stargazers)
+
+--------
+
 Sample implementation of Zserio Pub/Sub mosquitto backend in **C++**.
 
 ## Prerequisites

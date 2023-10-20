@@ -1,0 +1,48 @@
+name: Linux
+
+on:
+  push:
+    branches: [ master, '*-ci' ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * 0'
+
+jobs:
+  build_linux:
+    runs-on: ${{matrix.os}}
+    strategy:
+      matrix:
+        os: ["ubuntu-20.04", "ubuntu-22.04"]
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        submodules: recursive
+
+    - name: Install Mosquitto library
+      run: sudo apt-get install mosquitto libmosquitto-dev
+
+    - name: Build Zserio C++ Pub/Sub Mosquitto
+      run: |
+        mkdir build
+        cd build
+        cmake ../examples/calculator -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=../distr
+        cmake --build . --target install
+
+    - name: Test Zserio C++ Pub/Sub Mosquitto
+      run: |
+        cd build
+        ./PowerOfTwoProvider &
+        ./SquareRootOfProvider &
+        sleep 10
+        echo -e "p\\n100\\nq" | ./CalculatorClient | grep "square root of: 10"
+        echo -e "s\\n100\\nq" | ./CalculatorClient | grep "power of two: 10000"
+        kill $(jobs -p)
+
+    - name: Archive Build Zserio C++ Pub/Sub Mosquitto binary
+      uses: actions/upload-artifact@v3
+      with:
+        name: zserio-pubsub-mosquitto-cpp-${{matrix.os}}
+        path: distr/*
