@@ -41,7 +41,7 @@ jobs:
         echo -e "s\\n100\\nq" | ./CalculatorClient | grep "power of two: 10000"
         kill $(jobs -p)
 
-    - name: Archive Build Zserio C++ Pub/Sub Mosquitto binary
+    - name: Archive Zserio C++ Pub/Sub Mosquitto binary
       uses: actions/upload-artifact@v3
       with:
         name: zserio-pubsub-mosquitto-cpp-${{matrix.os}}
