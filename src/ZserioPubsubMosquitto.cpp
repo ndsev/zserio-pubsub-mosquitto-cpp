@@ -79,9 +79,9 @@ MosquittoClient::MosquittoSubscription::~MosquittoSubscription()
     if (m_mosq)
     {
         mosquitto_unsubscribe(m_mosq.get(), nullptr, m_topic.c_str());
-        mosquitto_disconnect(m_mosq.get());
         m_exitSignal.set_value();
         m_loopThread.join();
+        mosquitto_disconnect(m_mosq.get()); // must be called after m_loopThread is finished
     }
 }
 
