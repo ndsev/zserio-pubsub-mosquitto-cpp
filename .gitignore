@@ -1,2 +1,5 @@
 # generated build files
-build
+/build/
+
+# compiled binaries
+/distr/
