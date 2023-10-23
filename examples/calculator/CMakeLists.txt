@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.1.0)
 
 project(Calculator)
 
+set(CMAKE_INSTALL_RPATH "$ORIGIN")
+
 find_package(Java REQUIRED COMPONENTS Runtime)
 
 # generate Zserio Calculator Pub/Sub
@@ -88,3 +90,7 @@ target_include_directories(CalculatorGen PRIVATE "${ZSERIO_INCLUDE_DIR}")
 target_link_libraries(CalculatorClient ZserioCppRuntime)
 target_link_libraries(PowerOfTwoProvider ZserioCppRuntime)
 target_link_libraries(SquareRootOfProvider ZserioCppRuntime)
+
+install(TARGETS CalculatorClient DESTINATION ".")
+install(TARGETS PowerOfTwoProvider DESTINATION ".")
+install(TARGETS SquareRootOfProvider DESTINATION ".")
