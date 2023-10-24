@@ -1,0 +1,63 @@
+name: Windows
+
+on:
+  push:
+    branches: [ master, '*-ci' ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * 0'
+
+jobs:
+  build_windows:
+    runs-on: ${{matrix.os}}
+    strategy:
+      matrix:
+        os: ["windows-latest"]
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        submodules: recursive
+
+    - name: Install dependecies
+      run: |
+        choco install wget
+      shell: bash
+
+    - name: Install Mosquitto library
+      run: |
+        wget -P "${{github.workspace}}" https://mosquitto.org/files/binary/win64/mosquitto-2.0.18-install-windows-x64.exe
+        & "${{github.workspace}}/mosquitto-2.0.18-install-windows-x64.exe" /S
+
+    - name: Build Zserio C++ Pub/Sub Mosquitto
+      run: |
+        mkdir build
+        cd build
+        cmake ../examples/calculator -DCMAKE_INSTALL_PREFIX=../distr -DCMAKE_GENERATOR_PLATFORM=x64
+        cmake --build . --target install --config Release
+      env:
+        MOSQUITTO_INCLUDE_DIR: "/c/Program Files/mosquitto/devel"
+        MOSQUITTO_LIBRARY_DIR: "/c/Program Files/mosquitto/devel"
+      shell: bash
+
+    - name: Test Zserio C++ Pub/Sub Mosquitto
+      run: |
+        PATH=$PATH:"/c/Program Files/mosquitto"
+        mosquitto &
+        sleep 10
+        cd build/Release
+        ./PowerOfTwoProvider &
+        ./SquareRootOfProvider &
+        sleep 10
+        echo -e "p\\n100\\nq" | ./CalculatorClient | grep "square root of: 10"
+        echo -e "s\\n100\\nq" | ./CalculatorClient | grep "power of two: 10000"
+        kill $(jobs -p)
+      shell: bash
+
+    - name: Archive Zserio C++ Pub/Sub Mosquitto binary
+      uses: actions/upload-artifact@v3
+      with:
+        name: zserio-pubsub-mosquitto-cpp-${{matrix.os}}
+        path: distr/*
