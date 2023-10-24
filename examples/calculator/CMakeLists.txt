@@ -1,5 +1,5 @@
 # Calculator Example using Zserio Pub/Sub Mosquitto library
-cmake_minimum_required(VERSION 3.1.0)
+cmake_minimum_required(VERSION 3.5)
 
 project(Calculator)
 
