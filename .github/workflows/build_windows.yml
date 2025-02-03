@@ -57,7 +57,7 @@ jobs:
       shell: bash
 
     - name: Archive Zserio C++ Pub/Sub Mosquitto binary
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: zserio-pubsub-mosquitto-cpp-${{matrix.os}}
         path: distr/*
